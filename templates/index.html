@@ -8,17 +8,123 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
           integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 
-    <title>Kamer {{ kamer_nummer }}</title>
+    <style>
+        body{
+            background: black;
+        }
+        h1{
+            color: gray;
+        }
+        .flex-container {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+        display: -webkit-box;
+        display: -moz-box;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-flex-flow: row;
+        justify-content: space-around;
+
+        line-height:30px;
+    }
+    .flex-item {
+        margin: 5px;
+        color: white;
+        font-weight: bold;
+        font-size: 1.5em;
+        text-align: center;
+        flex: 1 0 auto;
+        height:auto;
+    }
+    .flex-item:before {
+        content:'';
+        float:left;
+        padding-top:100%;
+    }
+        .sos {
+            background: red !important;
+        }
+        .camoff {
+            background: darkorange !important;
+        }
+        .ok {
+            background: green !important;
+        }
+        .offline {
+            background: gray !important;
+        }
+        .header {
+            max-height: 3rem;
+        }
+        .clock{
+            float: right;
+        }
+    </style>
+
+    <title>Room Status</title>
 </head>
 <body>
-<div class="container">
-    <div class="row">
-        <div class="col-lg-8  offset-lg-2">
-            <h3 class="mt-5">Status: Live</h3>
-            <img src="{{ url_for('video_feed') }}" width="100%">
-        </div>
-    </div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<div class="flex-container header">
+    <div class="flex-item">Room Status</div>
+    <div class="flex-item"><span class="clock"><i class="fa fa-clock-o" aria-hidden="true"></i> <span id="hours">00</span><span id="colon">:</span><span id="minutes">00</span></span></div>
 </div>
+
+<div class="flex-container" id="status">
+    <div class="flex-item offline">Kamer 1</div>
+    <div class="flex-item offline">2</div>
+    <div class="flex-item offline">3</div>
+    <div class="flex-item offline">4</div>
+    <div class="flex-item offline">5</div>
+    <div class="flex-item offline">6</div>
+    <div class="flex-item offline">7</div>
+</div>
+<script>
+    $(document).ready(function(e) {
+        function clear(){
+            $('#status').empty();
+        }
+        function get_json(id){
+            $.ajax({
+                url: 'http://10.4.10.' + id + ':5000/status',
+                type: 'get',
+                dataType: 'json',
+                success: function (data) {
+                    content = '<div class="flex-item ' + data.cam_status + '"> kamer ' + data.room + '</div>';
+                    content += '<div class="flex-item camoff">2</div>\n' +
+                        '    <div class="flex-item offline">3</div>\n' +
+                        '    <div class="flex-item offline">4</div>\n' +
+                        '    <div class="flex-item offline">5</div>\n' +
+                        '    <div class="flex-item offline">6</div>\n' +
+                        '    <div class="flex-item offline">7</div>';
+                    $(content).appendTo('#status');
+
+            }
+            });
+        }
+
+        function state(){
+            clear()
+            get_json(20)
+        }
+
+        setInterval(state,10000);
+
+    // Code for Clock
+        let toggle = true;
+        setInterval(function() {
+        var d = new Date().toLocaleTimeString('en-US', { hour12: false, hour: 'numeric', minute: 'numeric' });
+        var parts = d.split(":");
+        $('#hours').text(parts[0]);
+        $('#minutes').text(parts[1]);
+        $("#colon").css({ visibility: toggle?"visible":"hidden"});
+        toggle=!toggle;
+    },1000);
+    });
+</script>
 </body>
 </html>
